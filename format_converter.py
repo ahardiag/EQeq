@@ -2,15 +2,12 @@
 Methods to interconvert between json and other (cif, mol, smi, etc.) files
 """
 
-import pybel
+from openbabel import pybel
 ob = pybel.ob
 import numpy as np
 from numpy.linalg import norm, inv
 
 import json_formatter as json
-
-table = ob.OBElementTable()
-
 
 def convert(data, in_format, out_format, pretty=False):
     """Converts between two inputted chemical formats.
@@ -149,7 +146,7 @@ def json_to_pybel(data, center=True):
     obmol.BeginModify()
     for atom in data["atoms"]:
         obatom = obmol.NewAtom()
-        obatom.SetAtomicNum(table.GetAtomicNum(str(atom["element"])))
+        obatom.SetAtomicNum(ob.GetAtomicNum(str(atom["element"])))
         obatom.SetVector(*atom["location"])
         if "charge" in atom:
             obatom.SetPartialCharge(atom["charge"])
@@ -179,7 +176,7 @@ def pybel_to_json(molecule):
         A Python dictionary containing atom and bond data
     """
     # Save atom element type and 3D location.
-    atoms = [{"element": table.GetSymbol(atom.atomicnum),
+    atoms = [{"element": ob.GetSymbol(atom.atomicnum),
               "location": atom.coords}
              for atom in molecule.atoms]
     # Saves partial charge data, if exists
@@ -210,4 +207,5 @@ if __name__ == "__main__":
             data = in_file.read()
     except IOError:
         data = in_data
-    print convert(data, in_format, out_format, pretty=True)
+    print(convert(data, in_format, out_format, pretty=True)) # modified by Arthur Hardiagon
+                                                             # fix old python2 syntax
