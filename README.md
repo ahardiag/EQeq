@@ -16,6 +16,14 @@ Modified version, which allows to specify additional parameters:
    IP: experimental, [C.E.Moore, 1970](https://nvlpubs.nist.gov/nistpubs/Legacy/NSRDS/nbsnsrds34.pdf)
  * `chargecenters` (default: [chargecenters.dat](data/chargecenters.dat)) File with common oxidation states (lowered, if missing ionizationdata)
 
+### Requirements
+
+The package requires :
+ - numpy
+ - openbabel (tested with : openbabel==3.1.0)
+
+> Note : do not use pybel from pip since it does not install the necessary methods from openbabel.
+
 ### Usage
 
 To run the HKUST-1 example:
