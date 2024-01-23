@@ -2,3 +2,6 @@
 .DS_Store
 eqeq
 *.swp
+eqeq.o
+libeqeq.so
+examples/*
