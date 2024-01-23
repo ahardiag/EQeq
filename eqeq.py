@@ -26,8 +26,8 @@ eqeq.run.argtypes = (c_char_p, c_char_p, c_double, c_float, c_int, c_char_p,
 eqeq.run.restype = c_char_p
 
 ROOT = os.path.normpath(os.path.dirname(__file__))
-DEFAULT_IONIZATION_PATH = os.path.join(ROOT, "ionizationdata.dat")
-DEFAULT_CHARGE_PATH = os.path.join(ROOT, "chargecenters.dat")
+DEFAULT_IONIZATION_PATH = os.path.join(ROOT, "data/ionizationdata.dat")
+DEFAULT_CHARGE_PATH = os.path.join(ROOT, "data/chargecenters.dat")
 
 
 def run(structure, input_type="cif", output_type="cif", l=1.2, h_i0=-2.0,
@@ -75,14 +75,26 @@ def run(structure, input_type="cif", output_type="cif", l=1.2, h_i0=-2.0,
     if input_type != "cif":
         structure = format_converter.convert(structure, input_type, "cif")
     structure = structure.replace("\t", "  ")
+
+    # Correct input type to bytes
+    structure_encoded = structure.encode('ascii')
+    output_type_encoded = (("json" if output_type == "list" else output_type)).encode('ascii')
+    method_encoded = method.encode('ascii')
+    ionization_data_path_encoded = ionization_data_path.encode('ascii')
+    charge_data_path_encoded = charge_data_path.encode('ascii')
+
     # Calls libeqeq.so's run method, returning a string of data
-    result = eqeq.run(structure, ("json" if output_type == "list" else
-                      output_type), l, h_i0, charge_precision, method, m_r,
-                      m_k, eta, ionization_data_path, charge_data_path)
+    result = eqeq.run(structure_encoded, output_type_encoded, l, h_i0, charge_precision, method_encoded, m_r,
+                      m_k, eta, ionization_data_path_encoded, charge_data_path_encoded)
+
+    if output_type != "files":
+        result = result.decode('ascii')
+
     if output_type == "list":
         return json.loads(result)
     # This option appends atoms in json/object data with a "charge" attribute
     if output_type == "json":
+        # TODO : DEBUG this option, there is an error of variable type when calling openbabel functions
         obj = format_converter.convert(structure, "cif", "object")
         result = json.loads(result)
         for atom, charge in zip(obj["atoms"], result):
